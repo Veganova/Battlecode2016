@@ -1,0 +1,107 @@
+package bunker;
+
+import java.util.ArrayList;
+
+import battlecode.common.*;
+
+public class RobotPlayer {
+	public static Direction movingDirection = Direction.EAST;
+	static RobotController rc;
+	static int ID = 0;
+	static MapLocation starting;
+	
+	public static void run(RobotController rcIn) throws GameActionException{
+		//test = new MapLocation(rc.getLocation().x,rc.getLocation().y);
+		rc=rcIn;
+		if(rc.getTeam()==Team.B){
+			movingDirection=Direction.WEST;
+		}
+		setLeader();
+	while(true)
+		try {
+			
+			repeat();
+			Clock.yield();
+		} catch (GameActionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	
+	public static void setLeader() throws GameActionException{
+		
+		if(rc.getRoundNum() == 0 && rc.getType() == RobotType.ARCHON)
+		{
+			Signal[] incomingMessages = rc.emptySignalQueue();
+			rc.broadcastMessageSignal(0, 0, 100);
+			if(incomingMessages.length == 0)
+				ID = 1;//LEADER
+		}
+	}
+	
+	
+	public static void report() throws GameActionException
+	{
+		if(rc.getRoundNum() >0)
+			rc.broadcastSignal(100);
+	}
+	
+	public static void leader() throws GameActionException
+	{
+		
+		
+	}
+	
+	public static void repeat() throws GameActionException{
+		startingArchonLoc();
+		
+		if(ID == 1)
+			leader();
+		else if(rc.getType() !=RobotType.ARCHON)
+		{
+			build2(RobotType.TURRET, movingDirection);
+			rc.move(movingDirection);
+			movingDirection = Direction.values()[(int)(Math.random()*8)];
+		}
+		
+	}
+	
+	public static void startingArchonLoc()
+	{
+		if(rc.getType() == RobotType.ARCHON)
+		{
+			starting = rc.getLocation();
+		}
+	}
+	
+	public static void build2(RobotType type, Direction choice){
+		Direction bestbuild = null;
+		int [] array = {0, 1, -1, 2, -2, 3, -3, 4};
+		int [] prices = {};
+		rc.setIndicatorString(0, " " + rc.getTeamParts());
+		if(type.partCost>rc.getTeamParts()){
+			return;
+		}
+		for(int x=0; x<8; x++){
+			bestbuild =Direction.values()[(array[x]+choice.ordinal())%8];
+			if(rc.canBuild(bestbuild, type))
+				break;
+		}
+		try {
+				if(type.partCost<rc.getTeamParts() && (rc.canBuild(bestbuild, type) &&rc.isCoreReady()))
+					rc.build(bestbuild, type);
+			} catch (GameActionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+
+
+	
+	
+	
+	
+
+}

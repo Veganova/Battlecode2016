@@ -1,0 +1,34 @@
+package bunker;
+
+import battlecode.common.*;
+
+public class Guards {
+	static MapLocation starting;
+	static Direction movingDirection = Direction.EAST;
+	
+	public static void Guardrepeat()
+	{
+		stayInRange(35);
+	}
+	
+	public static void startingGuardLoc(int range)
+	{
+		int x = range - (int)(Math.random()*range);
+		int y = 25 - x;
+		x = ((int)Math.sqrt(x)) + RobotPlayer.rc.getLocation().x;
+		y = ((int)Math.sqrt(y)) + RobotPlayer.rc.getLocation().y;
+		starting = new MapLocation(x,y);
+		RobotPlayer.rc.setIndicatorString(0, " " + starting);
+	}
+	
+	
+	public static void stayInRange(int outerRange)
+	{
+		if(starting.distanceSquaredTo(RobotPlayer.rc.getLocation())>=outerRange)
+		{
+			movingDirection = RobotPlayer.rc.getLocation().directionTo(starting);
+		}
+	}
+	
+	
+}

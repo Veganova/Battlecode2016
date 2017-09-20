@@ -1,0 +1,16 @@
+package bunker;
+
+import battlecode.common.*;
+
+public class Archon {
+
+	public static void startingArchonLoc()
+	{
+		if(RobotPlayer.rc.getRoundNum() ==0)
+		{
+			RobotPlayer.starting = RobotPlayer.rc.getLocation();
+		}
+	}
+	
+	
+}

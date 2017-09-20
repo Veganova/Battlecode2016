@@ -1,0 +1,64 @@
+package bunker;
+
+import java.util.ArrayList;
+
+import battlecode.common.*;
+
+public class RobotPlayer {
+	public static Direction movingDirection = Direction.EAST;
+	static RobotController rc;
+	static int ID = 0;
+	static MapLocation starting;
+	
+	public static void run(RobotController rcIn) throws GameActionException{
+		//test = new MapLocation(rc.getLocation().x,rc.getLocation().y);
+		rc=rcIn;
+		if(rc.getTeam()==Team.B){
+			movingDirection=Direction.WEST;
+		}
+		
+	while(true)
+		try {
+			
+			repeat();
+			Clock.yield();
+		} catch (GameActionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	
+	
+	public static void report() throws GameActionException
+	{
+		if(rc.getRoundNum() >0)
+			rc.broadcastSignal(100);
+	}
+	
+
+	
+	public static void repeat() throws GameActionException{
+		if(rc.getType() == RobotType.ARCHON)
+			Archon.startingArchonLoc();
+		
+		if(rc.getType() ==RobotType.ARCHON&&rc.getRoundNum()>0)
+		{
+			
+		}
+		
+	}
+	
+
+	
+
+}
+
+
+
+	
+	
+	
+	
+
+

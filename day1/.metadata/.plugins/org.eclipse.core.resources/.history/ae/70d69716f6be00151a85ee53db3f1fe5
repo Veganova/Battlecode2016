@@ -1,0 +1,82 @@
+package bunker;
+
+import battlecode.common.*;
+
+public class Guards {
+	static MapLocation starting;
+	public static double health = RobotPlayer.rc.getHealth();
+	public static MapLocation larchon;
+	static Direction movingDirection = Direction.EAST;
+	static boolean once = true;
+	public static void Guardrepeat() throws GameActionException
+	{
+		movement();
+	
+	}
+	
+	public static void startingGuardLoc(int range)
+	{
+		if(once)
+		{
+//			int x = (int)(Math.random()*(range+1));
+//			int y = range - x;
+//			int[] fk = new int[]{-1,1};
+//			x =  fk[(int)(Math.random()*2)] *  (int)(Math.sqrt(x)) + RobotPlayer.rc.getLocation().x;
+//			y = fk[(int)(Math.random()*2)] *(int)(Math.sqrt(y)) + RobotPlayer.rc.getLocation().y;
+//			starting = new MapLocation(x,y);
+//			RobotPlayer.rc.setIndicatorString(0, " " + starting);
+			int x = 5 -(int)(Math.random()*10) +  RobotPlayer.rc.getLocation().x;
+			int y = 5 -(int)(Math.random()*10) +  RobotPlayer.rc.getLocation().y;
+			starting = new MapLocation(x,y);
+			
+			RobotPlayer.rc.setIndicatorString(0, " " + starting);
+			once = false;
+		}
+	}
+	
+	public static void movement() throws GameActionException
+	{
+		movingDirection = Direction.values()[(int)(Math.random()*8)];
+		stayInRange(10);
+		
+		if(RobotPlayer.rc.isCoreReady() && RobotPlayer.rc.canMove(movingDirection))
+		{
+			RobotPlayer.rc.move(movingDirection);
+		}
+	}
+	
+	public static void stayInRange(int outerRange)
+	{
+		if(starting.distanceSquaredTo(RobotPlayer.rc.getLocation())>=outerRange)
+		{
+			movingDirection = RobotPlayer.rc.getLocation().directionTo(starting);
+		}
+	}
+
+public static void engage(){
+    RobotInfo[] info = RobotPlayer.rc.senseHostileRobots(rc.getLocation(), 30);
+    Signal[] search = RobotPlayer.rc.emptySignalQueue();
+    int target = (int)(Math.random()*info.length);
+    for(int x=0; x<search.length; x++){
+        if(search[x].getMessage()[1]>10){
+            larchon=search[x].getLocation();
+        }
+    }
+        
+        if(health<RobotPlayer.rc.getHealth() && info.length==0){ //retreat to archon if you can't see            if(larchon!=null)
+            movingDirection=RobotPlayer.rc.getLocation().directionTo(larchon);
+        }
+    try {
+        if(RobotPlayer.rc.isWeaponReady() && 
+                Math.abs(info[target].location.distanceSquaredTo(rc.getLocation()))
+                <= RobotType.GUARD.attackRadiusSquared){
+        	RobotPlayer.rc.attackLocation(info[target].location);}
+    } catch (GameActionException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+    }
+    health = RobotPlayer.rc.getHealth();
+}
+
+	
+}

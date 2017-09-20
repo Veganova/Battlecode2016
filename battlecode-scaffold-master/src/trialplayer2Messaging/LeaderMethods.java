@@ -1,0 +1,136 @@
+package trialplayer2Messaging;
+
+import java.util.ArrayList;
+
+import battlecode.common.*;
+
+public class LeaderMethods {
+
+	static RobotController rc = RobotPlayer.rc;
+	
+	static int x_coord;//initial coordinates
+	static int y_coord;
+	static int rel_x_coord;
+	static int rel_y_coord;
+	public static ArrayList<ArrayList<Double>> initialize(ArrayList<ArrayList<Double>> leadervision)
+	{
+		x_coord = rc.getLocation().x;
+		y_coord = rc.getLocation().y;
+
+		for(int y = 0; y<11; y++)
+		{
+			leadervision.add(new ArrayList<Double>());
+		}
+		int[] numrowelements = new int[]{7,9,11,11,11,11,11,11,11,9,7};
+
+
+		for(int y = 0; y<11; y++)
+		{
+			ArrayList<Double> tempRow = new ArrayList<Double>();
+			for(int top = 0; top<numrowelements[y]; top++)
+			{//-1 off map, 1xxxx (xxxx is parts value), (2xxxx is rubble value), 0 if empty
+				double parts = rc.senseParts(new MapLocation(x_coord- (int)(numrowelements[y]/2) + top,(y_coord-5)+y));
+				if(parts ==0 )//no parts, check rubble status
+				{
+					double rubble = rc.senseRubble(new MapLocation(x_coord- (int)(numrowelements[y]/2) + top,(y_coord-5)+y));
+					tempRow.add(-1*rubble);
+				}
+				else
+					tempRow.add(parts);//whether it is offmap or there are parts there (-1 or some value
+			}
+			leadervision.set(y, tempRow);
+			
+		}
+		//rc.setIndicatorString(0, " " +(numrowelements[0]/2));
+		rel_x_coord = 5;
+		rel_y_coord = 5;
+		return leadervision;
+	}
+	
+	
+	public static void move(Direction dir)
+	{
+		// left or right ( East or West)
+		if(dir == Direction.WEST)
+		{
+			//rel_x_coord and y stay the same;
+			for(int i = 0; i<RobotPlayer.leadervision.size();i++)
+			{
+				ArrayList<Double> tempRow = new ArrayList<Double>();
+				double parts = rc.senseParts(ArraytoMapCoords(i,0));
+				if(parts ==0 )//no parts, check rubble status
+				{
+					double rubble = rc.senseRubble(ArraytoMapCoords(i,0));
+					//RobotPlayer.leadervision.set
+					tempRow = RobotPlayer.leadervision.get(i);
+					tempRow.add(0,-1.0*rubble);
+					RobotPlayer.leadervision.set(i, tempRow);
+				}
+				else
+				{
+					tempRow = RobotPlayer.leadervision.get(i);tempRow.add(0,parts);
+					RobotPlayer.leadervision.set(i, tempRow);
+				}
+			}
+		}
+		else if(dir == Direction.EAST)
+		{
+
+			rel_x_coord++;
+			for(int i = 0; i<RobotPlayer.leadervision.size();i++)
+			{
+				ArrayList<Double> tempRow = new ArrayList<Double>();
+				double parts = rc.senseParts(ArraytoMapCoords(i,RobotPlayer.leadervision.get(i).size()-1));
+				if(parts ==0 )//no parts, check rubble status
+				{
+					double rubble = rc.senseRubble(ArraytoMapCoords(i,RobotPlayer.leadervision.get(i).size()-1));
+					//RobotPlayer.leadervision.set
+					tempRow = RobotPlayer.leadervision.get(i);
+					tempRow.add(-1.0*rubble);
+					RobotPlayer.leadervision.set(i, tempRow);
+				}
+				else
+				{
+					tempRow = RobotPlayer.leadervision.get(i);
+					tempRow.add(parts);
+					RobotPlayer.leadervision.set(i, tempRow);
+				}
+			}
+		}
+	}
+	
+	public static MapLocation ArraytoMapCoords( int y_coordinate , int x_coordinate)
+	{
+		int difY = rc.getLocation().y-rel_y_coord;
+		int difX = rc.getLocation().x-rel_x_coord;
+		int emptySpaceX = RobotPlayer.leadervision.get(y_coordinate).size() - RobotPlayer.leadervision.get(2).size();
+		if(emptySpaceX == 0)
+			return new MapLocation(y_coordinate+difY , x_coordinate + difX);
+		else//can be either less than 2 or 4
+		{
+			difX = rc.getLocation().x - rel_x_coord-emptySpaceX/2;//+ x_coordinate;
+			return new MapLocation(x_coordinate + difX, y_coordinate+difY );
+		}
+		
+	}
+	
+	public static double getValue(MapLocation coords)
+	{
+		int difY = rc.getLocation().y-rel_y_coord;
+		int difX = rc.getLocation().x-rel_x_coord;
+		int emptySpaceX = RobotPlayer.leadervision.get(coords.y - difY).size() - RobotPlayer.leadervision.get(2).size();
+		
+		if(emptySpaceX == 0)
+		{
+			return RobotPlayer.leadervision.get(coords.y-difY).get(coords.x - difX);
+		}
+		else//can be either less than 2 or 4
+		{
+			difX =  rc.getLocation().x -  (rel_x_coord +emptySpaceX/2);
+//			if(starting_coord <= coords.x && coords.x <= starting_coord + RobotPlayer.leadervision.get(coords.y - difY).size())//withing range
+//				difX = coords.x - starting_coord;
+			return RobotPlayer.leadervision.get(coords.y-difY).get(coords.x - difX);
+		}
+
+	}
+}
